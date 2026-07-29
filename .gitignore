@@ -1,0 +1,6 @@
+/.env
+/.venv/Lib/
+/.venv/Scripts/
+/.venv/.lock
+/.venv/CACHEDIR.TAG
+/.venv/pyvenv.cfg

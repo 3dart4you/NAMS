@@ -1,0 +1,5 @@
+LLM_BASE_URL="http://127.0.0.1:1234/v1"
+GEOAPIFY_BASE_URL="https://api.geoapify.com/v2/places"
+OPEN_METEO_URL="https://api.open-meteo.com/v1/forecast"
+LLM_MODEL="google/gemma-4-e4b"
+NOMINATIM_URL="https://nominatim.openstreetmap.org/search"

@@ -1,4 +1,6 @@
 from agents.orchestrator import run_orchestrator
 
-response = run_orchestrator(input(f"\nYou: "))
-print(response)
+if __name__ == "__main__":
+    while True:
+        response = run_orchestrator(input(f"\nYou: "))
+        print(response)
