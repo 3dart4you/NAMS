@@ -8,28 +8,41 @@ from tools.orchestrator_tools import geolocation
 SYSTEM_PROMPT = f"""Ти — оркестратор туристичного помічника.
 Сьогоднішня дата: {date.today().isoformat()}.
 
-Якщо користувач дає назву міста/локації словами (а не координатами) —
-СПОЧАТКУ виклич {geolocation}, щоб отримати lat/lon, і тільки
-ПОТІМ передавай ці координати субагентам погоди та пошуку місць.
-Не питай користувача про координати самостійно — завжди намагайся
-отримати їх через geolocation.
-
 Коли користувач каже "завтра", "вихідні" тощо — сам порахуй конкретну дату
 у форматі YYYY-MM-DD і передавай її субагентам.
 
-Якщо рекомендуєш місця для відпочинку на відкритому повітрі
-(тераси, парки, прогулянки), обов'язково перевір погоду для цієї локації."""
+Якщо в повідомленні користувача немає конкретики і він говорить, що хоче прогулятись, відвідати щось чи кудись поїхати
+обов'язково перевір погоду для цієї локації через субагента {run_weather_agent}. Для погоди не обов'язково точні 
+координати - достатньо знати регіон. Бери його орієнтовний центр і дивись погоду по ньому. Також запропонуй своє рішення.
+Приклад:
+user - "Де можна пообідати в районі парка Шевченка?"
+ai_assistant - "На вході в парк є кафе "Сяйво", в центрі парку можна замовити хотдоги в закладі "Пузатий Боб", 
+а березі ставка продається дуже смачне морозиво в "Смакота""
+
+Якщо користувач не прописав жодних вимог до комфорту, ціни, температури тощо збери цю інформацію і дай висновки типу 
+"найдешевше буде тут, а найкомфортніше може бути тут якщо любите дивани чи спокійну музику".
+
+Перед зверненням до субагентів тобі обов'язково треба дізнатись координати бажаного місця/міста через {geolocation} 
+і передати їх субагенту з назвою міста/місця."""
+
+agent = create_agent(
+    model=get_llm(),
+    tools=[run_places_agent, run_weather_agent, geolocation],
+    system_prompt=SYSTEM_PROMPT
+)
 
 def run_orchestrator(user_message: str) -> str:
-    agent = create_agent(
-        model=get_llm(),
-        tools=[run_places_agent, run_weather_agent, geolocation],
-        system_prompt=SYSTEM_PROMPT
-    )
+    full_response = ""
+    is_first_chunk = True
+    status_text = "🤔 NAMS думає..."
 
     for message_chunk, metadata in agent.stream({"messages": [user_message]}, stream_mode="messages"):
         if metadata.get("langgraph_node") == "model" and message_chunk.content:
+            if is_first_chunk:
+                print("\r" + " " * len(status_text) + "\r", end="", flush=True)
+                print("NAMS: ", end="", flush=True)
+                is_first_chunk = False
             print(message_chunk.content, end="", flush=True)
+            full_response += message_chunk.content
     print()
-
-    return "DONE"
+    return full_response

@@ -1,6 +1,23 @@
+import uuid
+from services.db import ChatDatabase
 from agents.orchestrator import run_orchestrator
 
-if __name__ == "__main__":
+def main():
+    print("NAMS: Вітаю! Чим я можу вам допомогти?")
+    db = ChatDatabase()
+    db.create_table()
+    session_id = str(uuid.uuid4())
+
     while True:
-        response = run_orchestrator(input(f"\nYou: "))
-        print(response)
+        user_input = input("\nYou: ")
+        db.save_message(session_id, "user", user_input)
+
+        print("\n🤔 NAMS думає...", end="", flush=True)
+        response = run_orchestrator(user_input)
+        if response:
+            db.save_message(session_id, "assistant", response)
+        else:
+            print("Не вдалося отримати відповідь, повідомлення не збережено.")
+
+if __name__ == "__main__":
+    main()

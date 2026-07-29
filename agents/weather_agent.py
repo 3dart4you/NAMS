@@ -3,6 +3,11 @@ from langchain_core.tools import tool
 from services.llm_factory import get_llm
 from tools.weather_tools import get_weather
 
+weather_agent = create_agent(
+    model=get_llm(),
+    tools=[get_weather],
+)
+
 @tool
 def run_weather_agent(user_message: str) -> str:
     """
@@ -14,10 +19,5 @@ def run_weather_agent(user_message: str) -> str:
         user_message: запит користувача своїми словами, з координатами/локацією і датою
     """
 
-    agent = create_agent(
-        model=get_llm(),
-        tools=[get_weather],
-    )
-
-    response = agent.invoke({"messages": user_message})["messages"][-1].content
+    response = weather_agent.invoke({"messages": user_message})["messages"][-1].content
     return response

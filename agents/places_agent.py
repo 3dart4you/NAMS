@@ -3,6 +3,11 @@ from services.llm_factory import get_llm
 from tools.places_tools import search_place
 from langchain_core.tools import tool
 
+places_agent = create_agent(
+    model=get_llm(),
+    tools=[search_place]
+)
+
 @tool
 def run_places_agent (user_message: str) -> str:
     """
@@ -14,10 +19,5 @@ def run_places_agent (user_message: str) -> str:
             (місто/координати, тип місця, вподобання)
     """
 
-    agent = create_agent(
-        model=get_llm(),
-        tools=[search_place]
-    )
-
-    response = agent.invoke({"messages": user_message})["messages"][-1].content
+    response = places_agent.invoke({"messages": user_message})["messages"][-1].content
     return response
