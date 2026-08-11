@@ -3,7 +3,7 @@ from services.llm_factory import get_llm
 from agents.places_agent import run_places_agent
 from agents.weather_agent import run_weather_agent
 from datetime import date
-from tools.orchestrator_tools import get_geolocation
+from tools.orchestrator_tools import get_geolocation, get_content
 
 SYSTEM_PROMPT = f"""Ти — оркестратор туристичного помічника.
 
@@ -24,16 +24,16 @@ Rules:
 
 agent = create_agent(
     model=get_llm(),
-    tools=[run_places_agent, run_weather_agent, get_geolocation],
+    tools=[run_places_agent, run_weather_agent, get_geolocation, get_content],
     system_prompt=SYSTEM_PROMPT
 )
 
-def run_orchestrator(user_message: str) -> str:
+def run_orchestrator(user_message) -> str:
     full_response = ""
     is_first_chunk = True
     status_text = "🤔 NAMS думає..."
 
-    for message_chunk, metadata in agent.stream({"messages": [user_message]}, stream_mode="messages"):
+    for message_chunk, metadata in agent.stream({"messages": user_message}, stream_mode="messages"):
         if metadata.get("langgraph_node") == "model" and message_chunk.content:
             if is_first_chunk:
                 print("\r" + " " * len(status_text) + "\r", end="", flush=True)
