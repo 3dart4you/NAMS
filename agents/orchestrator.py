@@ -28,18 +28,46 @@ agent = create_agent(
     system_prompt=SYSTEM_PROMPT
 )
 
-def run_orchestrator(user_message) -> str:
+def run_orchestrator(messages: list[dict]) -> str:
     full_response = ""
     is_first_chunk = True
     status_text = "🤔 NAMS думає..."
+    in_thinking = False
+    buffer = ""
 
-    for message_chunk, metadata in agent.stream({"messages": user_message}, stream_mode="messages"):
+    for message_chunk, metadata in agent.stream(
+        {"messages": messages},
+        stream_mode="messages",
+    ):
         if metadata.get("langgraph_node") == "model" and message_chunk.content:
-            if is_first_chunk:
-                print("\r" + " " * len(status_text) + "\r", end="", flush=True)
-                print("NAMS: ", end="", flush=True)
-                is_first_chunk = False
-            print(message_chunk.content, end="", flush=True)
-            full_response += message_chunk.content
+            buffer += message_chunk.content
+
+            while True:
+                if not in_thinking:
+                    start = buffer.find("<think>")
+                    if start == -1:
+                        clean, buffer = buffer, ""
+                    else:
+                        clean, buffer = buffer[:start], buffer[start + len("<think>"):]
+                        in_thinking = True
+
+                    if clean:
+                        if is_first_chunk:
+                            print("\r" + " " * len(status_text) + "\r", end="", flush=True)
+                            print("NAMS: ", end="", flush=True)
+                            is_first_chunk = False
+                        print(clean, end="", flush=True)
+                        full_response += clean
+                else:
+                    end = buffer.find("</think>")
+                    if end == -1:
+                        buffer = ""
+                        break
+                    else:
+                        buffer = buffer[end + len("</think>"):]
+                        in_thinking = False
+                        continue
+                break
+
     print()
     return full_response
