@@ -148,6 +148,15 @@ wheels = [
 ]
 
 [[package]]
+name = "checkpointer"
+version = "2.14.12"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a8/65/8504040dcdf0eb1681f737ce6b42a6b45a698b2f098277d1e89c4c7fead6/checkpointer-2.14.12.tar.gz", hash = "sha256:442213781920d6fc35f8d5f896334156778e037fcb95b06a38c99c8da752d2b3", size = 46686, upload-time = "2026-07-08T09:19:01.486Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/60/1f/df925d1d4303347889518e7cf5ad0f5a89d08d535dc2b9d89eeaeabc16bc/checkpointer-2.14.12-py3-none-any.whl", hash = "sha256:eabef45491ea12e40e4506981acffbf6b6fcea8617860f5775a5d394e2317662", size = 26552, upload-time = "2026-07-08T09:18:57.121Z" },
+]
+
+[[package]]
 name = "click"
 version = "8.4.2"
 source = { registry = "https://pypi.org/simple" }
@@ -731,6 +740,7 @@ name = "nams"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "checkpointer" },
     { name = "langchain" },
     { name = "langchain-core" },
     { name = "langchain-openai" },
@@ -745,6 +755,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "checkpointer", specifier = ">=2.14.12" },
     { name = "langchain", specifier = ">=1.3.14" },
     { name = "langchain-core", specifier = ">=1.5.0" },
     { name = "langchain-openai", specifier = ">=1.4.0" },
