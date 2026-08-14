@@ -1,5 +1,3 @@
-from langgraph.checkpoint.sqlite import SqliteSaver
-import sqlite3
 from langchain.agents import create_agent
 from services.llm_factory import get_llm
 from agents.places_agent import run_places_agent
@@ -24,15 +22,14 @@ Rules:
 'найдешевше буде тут, а найкомфортніше може бути тут якщо любите дивани чи спокійну музику'.
 """
 
-checkpointer = SqliteSaver(sqlite3.connect("chat_history.db", check_same_thread=False))
-agent = create_agent(
-    model=get_llm(),
-    tools=[run_places_agent, run_weather_agent, get_geolocation, get_content],
-    system_prompt=SYSTEM_PROMPT,
-    checkpointer=checkpointer
-)
 
-def run_orchestrator(messages: str, thread_id: str) -> str:
+def run_orchestrator(messages: str, thread_id: str, checkpointer) -> str:
+    agent = create_agent(
+        model=get_llm(),
+        tools=[run_places_agent, run_weather_agent, get_geolocation, get_content],
+        system_prompt=SYSTEM_PROMPT,
+        checkpointer=checkpointer
+    )
     full_response = ""
     is_first_chunk = True
     status_text = "🤔 NAMS думає..."
